@@ -1,0 +1,22 @@
+# Thư mục build Maven
+/target/
+
+# IDE files
+/.idea/
+/*.iml
+/.classpath
+/.project
+/.settings/
+
+# Log files
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Spring Boot DevTools
+spring-boot-devtools-*.jar
+
+# Generated files
+*.class
