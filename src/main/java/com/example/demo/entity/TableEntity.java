@@ -2,28 +2,25 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "[Dishs]")
+@Table(name = "[Tables]")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Dish {
+public class TableEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dishId;
+    private Long tableID;
 
-    private String name;
-    private double price;
-    private String description;
-
-    private Long categoryID; // Nếu bạn muốn liên kết Category, có thể dùng @ManyToOne
+    private String tableNumber;
+    private String status; // ví dụ: available, occupied
+    private Long areaID;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String image;
-    private String type;
+    private int numberOfDesk; // số lượng chỗ ngồi
 }
