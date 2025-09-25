@@ -18,12 +18,18 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderID;
 
-    private Long userID;
-    private Long tableID;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;  // <-- dùng User trực tiếp
+
+    @ManyToOne
+    @JoinColumn(name = "table_id")
+    private TableEntity table;
+
     private LocalDateTime createdAt;
-    private String status; // ex: pending, confirmed, served
+    private String status;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "orderID")
+    @JoinColumn(name = "order_id")
     private List<OrderItem> orderItems;
 }

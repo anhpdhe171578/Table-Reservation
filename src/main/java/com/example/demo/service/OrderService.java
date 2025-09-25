@@ -1,12 +1,19 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.OrderDTO;
+
 import java.util.List;
+import java.util.UUID;
 
 public interface OrderService {
-    OrderDTO createOrder(Long userID, Long tableID);
-    List<OrderDTO> getOrdersByUser(Long userID);
-    List<OrderDTO> getOrdersByTable(Long tableID);
-    OrderDTO updateOrderItem(Long orderID, Long dishId, int quantity);
-    void removeOrderItem(Long orderID, Long dishId);
+
+    OrderDTO createOrder(UUID userId, Long tableId);
+
+    List<OrderDTO> getOrdersByUser(UUID userId);
+
+    List<OrderDTO> getOrdersByTable(Long tableId);
+
+    OrderDTO updateOrderItem(Long orderId, Long dishId, int quantity);
+
+    void removeOrderItem(Long orderId, Long dishId);
 }

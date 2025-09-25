@@ -5,13 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDTO {
     private Long orderID;
-    private Long userID;
+    private UUID userId;
     private Long tableID;
     private LocalDateTime createdAt;
     private String status;

@@ -55,7 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private CategoryDTO toDTO(Category c) {
         return new CategoryDTO(
-                c.getIdCategory(),
+                c.getCategoryID(),
                 c.getName(),
                 c.getCreatedAt(),
                 c.getUpdatedAt()

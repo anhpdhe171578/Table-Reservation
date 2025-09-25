@@ -1,7 +1,9 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.TableDTO;
+import com.example.demo.entity.Area;
 import com.example.demo.entity.TableEntity;
+import com.example.demo.repository.AreaRepository;
 import com.example.demo.repository.TableRepository;
 import com.example.demo.service.TableService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,9 @@ public class TableServiceImpl implements TableService {
 
     @Autowired
     private TableRepository tableRepository;
+
+    @Autowired
+    private AreaRepository areaRepository;
 
     @Override
     public List<TableDTO> getAllTables() {
@@ -44,9 +49,13 @@ public class TableServiceImpl implements TableService {
         return tableRepository.findById(id).map(t -> {
             t.setTableNumber(dto.getTableNumber());
             t.setStatus(dto.getStatus());
-            t.setAreaID(dto.getAreaID());
             t.setNumberOfDesk(dto.getNumberOfDesk());
             t.setUpdatedAt(LocalDateTime.now());
+
+            Area area = areaRepository.findById(dto.getAreaID())
+                    .orElseThrow(() -> new RuntimeException("Area not found"));
+            t.setArea(area);
+
             return toDTO(tableRepository.save(t));
         }).orElse(null);
     }
@@ -61,7 +70,7 @@ public class TableServiceImpl implements TableService {
                 t.getTableID(),
                 t.getTableNumber(),
                 t.getStatus(),
-                t.getAreaID(),
+                t.getArea() != null ? t.getArea().getAreaID() : null, // lấy id từ area
                 t.getCreatedAt(),
                 t.getUpdatedAt(),
                 t.getNumberOfDesk()
@@ -72,8 +81,14 @@ public class TableServiceImpl implements TableService {
         TableEntity t = new TableEntity();
         t.setTableNumber(dto.getTableNumber());
         t.setStatus(dto.getStatus());
-        t.setAreaID(dto.getAreaID());
         t.setNumberOfDesk(dto.getNumberOfDesk());
+
+        if (dto.getAreaID() != null) {
+            Area area = areaRepository.findById(dto.getAreaID())
+                    .orElseThrow(() -> new RuntimeException("Area not found"));
+            t.setArea(area);
+        }
+
         return t;
     }
 }

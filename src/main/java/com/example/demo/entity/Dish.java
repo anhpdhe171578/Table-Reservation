@@ -2,17 +2,17 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "[Dishs]")
+@Table(name = "Dishs")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Dish {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dishId;
@@ -21,7 +21,10 @@ public class Dish {
     private double price;
     private String description;
 
-    private Long categoryID; // Nếu bạn muốn liên kết Category, có thể dùng @ManyToOne
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category; // dùng entity Category
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String image;

@@ -16,7 +16,13 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId; // liên kết User
-    private Long dishId; // liên kết Dish
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user; // liên kết User
+
+    @ManyToOne
+    @JoinColumn(name = "dish_id")
+    private Dish dish; // liên kết Dish
+
     private int quantity;
 }

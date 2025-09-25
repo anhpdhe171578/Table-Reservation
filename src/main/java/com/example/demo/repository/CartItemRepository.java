@@ -1,20 +1,20 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.CartItem;
+import com.example.demo.entity.Dish;
+import com.example.demo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
-    // Lấy tất cả món trong giỏ của user
-    List<CartItem> findByUserId(Long userId);
+    List<CartItem> findByUser(User user);
 
-    // Tìm món cụ thể trong giỏ của user
-    CartItem findByUserIdAndDishId(Long userId, Long dishId);
+    CartItem findByUserAndDish(User user, Dish dish);
 
-    // Xóa toàn bộ giỏ hàng của user
-    void deleteAllByUserId(Long userId);
+    void deleteAllByUser(User user);
 }

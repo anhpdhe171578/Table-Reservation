@@ -2,11 +2,12 @@ package com.example.demo.service;
 
 import com.example.demo.dto.CartItemDTO;
 import java.util.List;
+import java.util.UUID;
 
 public interface CartService {
-    List<CartItemDTO> getCartByUser(Long userId);
-    CartItemDTO addToCart(Long userId, Long dishId, int quantity);
-    CartItemDTO updateQuantity(Long userId, Long dishId, int quantity);
-    void removeFromCart(Long userId, Long dishId);
-    void clearCart(Long userId);
+    List<CartItemDTO> getCartByUser(UUID userId);
+    CartItemDTO addToCart(UUID userId, Long dishId, int quantity);
+    CartItemDTO updateQuantity(UUID userId, Long dishId, int quantity);
+    void removeFromCart(UUID userId, Long dishId);
+    void clearCart(UUID userId);
 }

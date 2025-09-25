@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -16,14 +17,14 @@ public class CartController {
     private CartService cartService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<List<CartItemDTO>>> getCart(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<List<CartItemDTO>>> getCart(@PathVariable UUID userId) {
         List<CartItemDTO> cart = cartService.getCartByUser(userId);
         return ResponseEntity.ok(new ApiResponse<>("success", "Lấy giỏ hàng thành công", cart));
     }
 
     @PostMapping("/{userId}/add")
     public ResponseEntity<ApiResponse<CartItemDTO>> addToCart(
-            @PathVariable Long userId,
+            @PathVariable UUID userId,
             @RequestParam Long dishId,
             @RequestParam int quantity) {
         CartItemDTO item = cartService.addToCart(userId, dishId, quantity);
@@ -32,7 +33,7 @@ public class CartController {
 
     @PutMapping("/{userId}/update")
     public ResponseEntity<ApiResponse<CartItemDTO>> updateCart(
-            @PathVariable Long userId,
+            @PathVariable UUID userId,
             @RequestParam Long dishId,
             @RequestParam int quantity) {
         CartItemDTO item = cartService.updateQuantity(userId, dishId, quantity);
@@ -43,14 +44,14 @@ public class CartController {
 
     @DeleteMapping("/{userId}/remove")
     public ResponseEntity<ApiResponse<Void>> removeFromCart(
-            @PathVariable Long userId,
+            @PathVariable UUID userId,
             @RequestParam Long dishId) {
         cartService.removeFromCart(userId, dishId);
         return ResponseEntity.ok(new ApiResponse<>("success", "Xóa món khỏi giỏ hàng thành công", null));
     }
 
     @DeleteMapping("/{userId}/clear")
-    public ResponseEntity<ApiResponse<Void>> clearCart(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<Void>> clearCart(@PathVariable UUID userId) {
         cartService.clearCart(userId);
         return ResponseEntity.ok(new ApiResponse<>("success", "Xóa toàn bộ giỏ hàng thành công", null));
     }

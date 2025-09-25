@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemDTO {
     private Long id;
-    private Long userId;
+    private UUID userId;
     private Long dishId;
     private int quantity;
 }

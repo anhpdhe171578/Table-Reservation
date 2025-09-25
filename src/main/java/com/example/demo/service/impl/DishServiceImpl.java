@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.DishDTO;
 import com.example.demo.entity.Dish;
+import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.DishRepository;
 import com.example.demo.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,8 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private DishRepository dishRepository;
-
+    @Autowired
+    private CategoryRepository categoryRepository;
     @Override
     public List<DishDTO> getAllDishes() {
         return dishRepository.findAll()
@@ -46,7 +48,11 @@ public class DishServiceImpl implements DishService {
             d.setDescription(dto.getDescription());
             d.setImage(dto.getImage());
             d.setType(dto.getType());
-            d.setCategoryID(dto.getCategoryId());
+
+            // Set category
+            categoryRepository.findById(dto.getCategoryId())
+                    .ifPresent(d::setCategory);
+
             return toDTO(dishRepository.save(d));
         }).orElse(null);
     }
@@ -56,7 +62,6 @@ public class DishServiceImpl implements DishService {
         dishRepository.deleteById(id);
     }
 
-    // Convert entity -> DTO
     private DishDTO toDTO(Dish d) {
         return new DishDTO(
                 d.getDishId(),
@@ -65,11 +70,10 @@ public class DishServiceImpl implements DishService {
                 d.getDescription(),
                 d.getImage(),
                 d.getType(),
-                d.getCategoryID()
+                d.getCategory() != null ? d.getCategory().getCategoryID() : null
         );
     }
 
-    // Convert DTO -> entity
     private Dish toEntity(DishDTO dto) {
         Dish d = new Dish();
         d.setName(dto.getName());
@@ -77,7 +81,12 @@ public class DishServiceImpl implements DishService {
         d.setDescription(dto.getDescription());
         d.setImage(dto.getImage());
         d.setType(dto.getType());
-        d.setCategoryID(dto.getCategoryId());
+
+        if (dto.getCategoryId() != null) {
+            categoryRepository.findById(dto.getCategoryId())
+                    .ifPresent(d::setCategory);
+        }
+
         return d;
     }
 }

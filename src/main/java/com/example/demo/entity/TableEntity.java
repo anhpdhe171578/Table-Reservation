@@ -3,9 +3,10 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "[Tables]")
+@Table(name = "tables")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,9 +19,15 @@ public class TableEntity {
     private Long tableID;
 
     private String tableNumber;
-    private String status; // ví dụ: available, occupied
-    private Long areaID;
+    private String status; // available, occupied
+    private int numberOfDesk;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private int numberOfDesk; // số lượng chỗ ngồi
+
+    @ManyToOne
+    @JoinColumn(name = "areaID")
+    private Area area;
+
+    @OneToMany(mappedBy = "table")
+    private List<Order> orders;
 }

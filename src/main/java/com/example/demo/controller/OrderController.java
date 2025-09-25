@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -17,14 +18,14 @@ public class OrderController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<OrderDTO>> createOrder(
-            @RequestParam Long userID,
+            @RequestParam UUID userID,
             @RequestParam Long tableID) {
         OrderDTO order = orderService.createOrder(userID, tableID);
         return ResponseEntity.ok(new ApiResponse<>("success", "Đặt món thành công", order));
     }
 
     @GetMapping("/user/{userID}")
-    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUser(@PathVariable Long userID) {
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUser(@PathVariable UUID userID) {
         List<OrderDTO> orders = orderService.getOrdersByUser(userID);
         return ResponseEntity.ok(new ApiResponse<>("success", "Danh sách đơn hàng của user", orders));
     }
