@@ -23,15 +23,25 @@ public class OrderController {
         OrderDTO order = orderService.createOrder(userID, tableID);
         return ResponseEntity.ok(new ApiResponse<>("success", "Đặt món thành công", order));
     }
+    @PostMapping("/tables/{tableId}/add-dish")
+    public ResponseEntity<OrderDTO> addDishToTable(
+            @PathVariable Long tableId,
+            @RequestParam Long dishId,
+            @RequestParam int quantity
+    ) {
+        return ResponseEntity.ok(orderService.addDishToTable(tableId, dishId, quantity));
+    }
 
     @GetMapping("/user/{userID}")
-    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUser(@PathVariable UUID userID) {
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUser(
+            @PathVariable UUID userID) {
         List<OrderDTO> orders = orderService.getOrdersByUser(userID);
         return ResponseEntity.ok(new ApiResponse<>("success", "Danh sách đơn hàng của user", orders));
     }
 
     @GetMapping("/table/{tableID}")
-    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByTable(@PathVariable Long tableID) {
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByTable(
+            @PathVariable Long tableID) {
         List<OrderDTO> orders = orderService.getOrdersByTable(tableID);
         return ResponseEntity.ok(new ApiResponse<>("success", "Danh sách đơn hàng của bàn", orders));
     }

@@ -38,7 +38,9 @@ public class AreaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<AreaDTO>> updateArea(@PathVariable Long id, @RequestBody AreaDTO dto) {
+    public ResponseEntity<ApiResponse<AreaDTO>> updateArea(
+            @PathVariable Long id,
+            @RequestBody AreaDTO dto) {
         AreaDTO updated = areaService.updateArea(id, dto);
         if (updated == null) return ResponseEntity.ok(new ApiResponse<>("error", "Không tìm thấy khu vực", null));
         return ResponseEntity.ok(new ApiResponse<>("success", "Cập nhật khu vực thành công", updated));

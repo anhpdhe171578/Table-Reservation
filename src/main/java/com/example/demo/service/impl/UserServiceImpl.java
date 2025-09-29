@@ -56,6 +56,7 @@ public class UserServiceImpl implements UserService {
                 .userName(user.getUserName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .status(user.isStatus() ? "active" : "inactive")
                 .build();
     }
 }

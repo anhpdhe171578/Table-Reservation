@@ -16,4 +16,6 @@ public interface OrderService {
     OrderDTO updateOrderItem(Long orderId, Long dishId, int quantity);
 
     void removeOrderItem(Long orderId, Long dishId);
+
+    OrderDTO addDishToTable(Long tableId, Long dishId, int quantity);
 }

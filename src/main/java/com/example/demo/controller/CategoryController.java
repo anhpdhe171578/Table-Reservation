@@ -37,7 +37,9 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(
+            @PathVariable Long id,
+            @RequestBody CategoryDTO dto) {
         CategoryDTO updated = categoryService.updateCategory(id, dto);
         if (updated == null) return ResponseEntity.ok(new ApiResponse<>("error", "Không tìm thấy category", null));
         return ResponseEntity.ok(new ApiResponse<>("success", "Cập nhật category thành công", updated));

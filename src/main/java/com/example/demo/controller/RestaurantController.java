@@ -32,13 +32,16 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<RestaurantDTO>> createRestaurant(@RequestBody RestaurantDTO dto) {
+    public ResponseEntity<ApiResponse<RestaurantDTO>> createRestaurant(
+            @RequestBody RestaurantDTO dto) {
         RestaurantDTO created = restaurantService.createRestaurant(dto);
         return ResponseEntity.ok(new ApiResponse<>("success", "Tạo nhà hàng thành công", created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<RestaurantDTO>> updateRestaurant(@PathVariable Long id, @RequestBody RestaurantDTO dto) {
+    public ResponseEntity<ApiResponse<RestaurantDTO>> updateRestaurant(
+            @PathVariable Long id,
+            @RequestBody RestaurantDTO dto) {
         RestaurantDTO updated = restaurantService.updateRestaurant(id, dto);
         if (updated == null) return ResponseEntity.ok(new ApiResponse<>("error", "Không tìm thấy nhà hàng", null));
         return ResponseEntity.ok(new ApiResponse<>("success", "Cập nhật nhà hàng thành công", updated));

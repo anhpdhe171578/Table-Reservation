@@ -4,25 +4,21 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Order_Items")
+@Table(name = "User_Roles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItem {
+public class UserRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int quantity;
+    @Column(name = "user_id", nullable = false)
+    private java.util.UUID userId;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
-
-    @ManyToOne
-    @JoinColumn(name = "dish_id")
-    private Dish dish;
+    @Column(name = "role_id", nullable = false)
+    private Long roleId;
 }

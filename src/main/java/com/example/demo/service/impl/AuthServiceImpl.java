@@ -4,8 +4,13 @@ import com.example.demo.config.JwtUtil;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.AuthResponse;
+import com.example.demo.entity.Role;
+import com.example.demo.entity.RoleName;
 import com.example.demo.entity.User;
+import com.example.demo.entity.UserRole;
+import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.UserRoleRepository;
 import com.example.demo.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +24,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
+    @Autowired
+    private UserRoleRepository userRoleRepository;
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -43,6 +52,18 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
+
+        // 🔹 Lấy role CUSTOMER
+        Role customerRole = roleRepository.findByName(RoleName.CUSTOMER)
+                .orElseThrow(() -> new RuntimeException("Role CUSTOMER not found"));
+
+        // 🔹 Gán role cho user
+        UserRole userRole = UserRole.builder()
+                .userId(user.getId())
+                .roleId(customerRole.getId())
+                .build();
+
+        userRoleRepository.save(userRole);
 
         String token = jwtUtil.generateToken(user.getId(), user.getUserName());
 

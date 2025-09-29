@@ -37,7 +37,9 @@ public class TableController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TableDTO>> updateTable(@PathVariable Long id, @RequestBody TableDTO dto) {
+    public ResponseEntity<ApiResponse<TableDTO>> updateTable(
+            @PathVariable Long id,
+            @RequestBody TableDTO dto) {
         TableDTO updated = tableService.updateTable(id, dto);
         if (updated == null) return ResponseEntity.ok(new ApiResponse<>("error", "Không tìm thấy bàn", null));
         return ResponseEntity.ok(new ApiResponse<>("success", "Cập nhật bàn thành công", updated));

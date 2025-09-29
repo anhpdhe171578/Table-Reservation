@@ -38,7 +38,9 @@ public class DishController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<DishDTO>> updateDish(@PathVariable Long id, @RequestBody DishDTO dto) {
+    public ResponseEntity<ApiResponse<DishDTO>> updateDish(
+            @PathVariable Long id,
+            @RequestBody DishDTO dto) {
         DishDTO updated = dishService.updateDish(id, dto);
         if (updated == null) return ResponseEntity.ok(new ApiResponse<>("error", "Không tìm thấy món ăn", null));
         return ResponseEntity.ok(new ApiResponse<>("success", "Cập nhật món ăn thành công", updated));

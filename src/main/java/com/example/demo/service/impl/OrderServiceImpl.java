@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.DishDTO;
 import com.example.demo.dto.OrderDTO;
 import com.example.demo.dto.OrderItemDTO;
 import com.example.demo.entity.CartItem;
@@ -74,6 +75,48 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderDTO addDishToTable(Long tableId, Long dishId, int quantity) {
+        TableEntity table = tableRepository.findById(tableId)
+                .orElseThrow(() -> new RuntimeException("Table not found"));
+
+        // tìm order "pending" cho table
+        Order order = orderRepository.findByTableAndStatus(table, "pending")
+                .orElse(null);
+
+        if (order == null) {
+            order = Order.builder()
+                    .table(table)
+                    .status("pending")
+                    .createdAt(LocalDateTime.now())
+                    .build();
+        }
+
+        Dish dish = dishRepository.findById(dishId)
+                .orElseThrow(() -> new RuntimeException("Dish not found"));
+
+        // kiểm tra xem món đã có trong order chưa
+        OrderItem existingItem = order.getOrderItems()
+                .stream()
+                .filter(i -> i.getDish().getDishId().equals(dishId))
+                .findFirst()
+                .orElse(null);
+
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+        } else {
+            OrderItem newItem = OrderItem.builder()
+                    .dish(dish)
+                    .quantity(quantity)
+                    .build();
+            order.getOrderItems().add(newItem);
+        }
+
+        orderRepository.save(order);
+
+        return toDTO(order);
+    }
+
+    @Override
     public List<OrderDTO> getOrdersByUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         return orderRepository.findByUser(user)
@@ -115,14 +158,33 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
+
     private OrderDTO toDTO(Order order) {
 
         List<OrderItemDTO> items = order.getOrderItems()
                 .stream()
                 .map(i -> {
-                    double price = i.getDish().getPrice();
+                    Dish dish = i.getDish();
+                    double price = dish.getPrice();
                     double amount = i.getQuantity() * price;
-                    return new OrderItemDTO(i.getDish().getDishId(), i.getQuantity(), price, amount);
+
+                    DishDTO dishDTO = new DishDTO(
+                            dish.getDishId(),
+                            dish.getName(),
+                            dish.getPrice(),
+                            dish.getDescription(),
+                            dish.getImage(),
+                            dish.getType(),
+                            dish.getCategory() != null ? dish.getCategory().getCategoryID() : null
+                    );
+
+                    return new OrderItemDTO(
+                            i.getId(),
+                            dishDTO,
+                            i.getQuantity(),
+                            price,
+                            amount
+                    );
                 })
                 .collect(Collectors.toList());
 

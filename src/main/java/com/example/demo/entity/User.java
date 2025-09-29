@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "app_users")
+@Table(name = "App_Users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,14 +28,14 @@ public class User {
     private String phoneNumber;
     private Boolean phoneNumberConfirmed;
     private String gender;
-    private Boolean status;
+    private boolean status;
     private String refreshToken;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<AppRole> roles;
+    private Set<Role> roles;
 
     @OneToMany(mappedBy = "user")
     private Set<CartItem> cartItems;

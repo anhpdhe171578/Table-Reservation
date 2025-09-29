@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemDTO {
-    private Long dishId;
+    private Long id;
+    private DishDTO dish;
     private int quantity;
-    private double price;   // giá món
-    private double amount;  // quantity * price
+    private double price;
+    private double amount;
 }

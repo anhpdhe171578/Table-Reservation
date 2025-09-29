@@ -16,4 +16,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Lấy danh sách order theo Table
     List<Order> findByTable(TableEntity table);
+
+    List<Order> findByTableAndStatus(TableEntity table, String status);
 }

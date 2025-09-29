@@ -38,7 +38,9 @@ public class BlogController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<BlogDTO>> updateDish(@PathVariable Long id, @RequestBody BlogDTO dto) {
+    public ResponseEntity<ApiResponse<BlogDTO>> updateDish(
+            @PathVariable Long id,
+            @RequestBody BlogDTO dto) {
         BlogDTO updated = blogService.updateBlog(id, dto);
         if (updated == null) return ResponseEntity.ok(new ApiResponse<>("error", "Không tìm thấy món ăn", null));
         return ResponseEntity.ok(new ApiResponse<>("success", "Cập nhật món ăn thành công", updated));
