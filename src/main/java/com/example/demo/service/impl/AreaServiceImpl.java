@@ -7,7 +7,9 @@ import com.example.demo.repository.AreaRepository;
 import com.example.demo.repository.RestaurantRepository;
 import com.example.demo.service.AreaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,7 +53,7 @@ public class AreaServiceImpl implements AreaService {
             a.setAreaName(dto.getAreaName());
             if (dto.getRestaurantID() != null) {
                 Restaurant r = restaurantRepository.findById(dto.getRestaurantID())
-                        .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant not found"));
                 a.setRestaurant(r);
             }
             a.setUpdatedAt(LocalDateTime.now());
@@ -79,7 +81,7 @@ public class AreaServiceImpl implements AreaService {
         a.setAreaName(dto.getAreaName());
         if (dto.getRestaurantID() != null) {
             Restaurant r = restaurantRepository.findById(dto.getRestaurantID())
-                    .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant not found"));
             a.setRestaurant(r);
         }
         return a;

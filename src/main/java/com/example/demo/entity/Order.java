@@ -26,6 +26,7 @@ public class Order {
     @JoinColumn(name = "table_id")
     private TableEntity table;
 
+    private LocalDateTime reservationTime;
     private LocalDateTime createdAt;
     private String status;
 

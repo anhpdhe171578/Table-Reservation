@@ -15,6 +15,7 @@ public class OrderDTO {
     private UUID userId;
     private Long tableID;
     private LocalDateTime createdAt;
+    private LocalDateTime reservationTime;
     private String status;
     private List<OrderItemDTO> orderItems;
     private double totalAmount;

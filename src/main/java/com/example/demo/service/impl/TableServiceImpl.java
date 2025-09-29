@@ -7,7 +7,10 @@ import com.example.demo.repository.AreaRepository;
 import com.example.demo.repository.TableRepository;
 import com.example.demo.service.TableService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +56,7 @@ public class TableServiceImpl implements TableService {
             t.setUpdatedAt(LocalDateTime.now());
 
             Area area = areaRepository.findById(dto.getAreaID())
-                    .orElseThrow(() -> new RuntimeException("Area not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Area not found"));
             t.setArea(area);
 
             return toDTO(tableRepository.save(t));
@@ -85,7 +88,7 @@ public class TableServiceImpl implements TableService {
 
         if (dto.getAreaID() != null) {
             Area area = areaRepository.findById(dto.getAreaID())
-                    .orElseThrow(() -> new RuntimeException("Area not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Area not found"));
             t.setArea(area);
         }
 

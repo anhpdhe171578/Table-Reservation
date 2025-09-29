@@ -13,8 +13,10 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.UserRoleRepository;
 import com.example.demo.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -55,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 🔹 Lấy role CUSTOMER
         Role customerRole = roleRepository.findByName(RoleName.CUSTOMER)
-                .orElseThrow(() -> new RuntimeException("Role CUSTOMER not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role Customer not found"));
 
         // 🔹 Gán role cho user
         UserRole userRole = UserRole.builder()
@@ -81,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
         Optional<User> userOpt = userRepository.findByUserName(request.getUserName());
         if (userOpt.isEmpty()) {
-            throw new RuntimeException("User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
         }
 
         User user = userOpt.get();

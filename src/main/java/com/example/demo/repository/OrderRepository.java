@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -17,5 +18,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Lấy danh sách order theo Table
     List<Order> findByTable(TableEntity table);
 
-    List<Order> findByTableAndStatus(TableEntity table, String status);
+    Optional<Order> findByTableAndStatus(TableEntity table, String status);
 }

@@ -35,7 +35,9 @@ public class UserController {
 
     // Cập nhật user
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable UUID id, @RequestBody RegisterRequest request) {
+    public ResponseEntity<UserDTO> update(
+            @PathVariable UUID id,
+            @RequestBody RegisterRequest request) {
         UserDTO updated = userService.update(id, request);
         if (updated == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(updated);

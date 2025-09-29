@@ -6,6 +6,8 @@ import com.example.demo.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,13 +18,21 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<OrderDTO>> createOrder(
-            @RequestParam UUID userID,
-            @RequestParam Long tableID) {
-        OrderDTO order = orderService.createOrder(userID, tableID);
-        return ResponseEntity.ok(new ApiResponse<>("success", "Đặt món thành công", order));
+    @PostMapping("/customer/create")
+    public ResponseEntity<OrderDTO> createOrderForCustomer(
+            @RequestParam UUID userId,
+            @RequestParam Long tableId,
+            @RequestParam String reservationTime  // từ client gửi string ISO, vd: 2025-09-30T19:30
+    ) {
+        LocalDateTime resTime = LocalDateTime.parse(reservationTime);
+        return ResponseEntity.ok(orderService.createOrderFromCart(userId, tableId, resTime));
     }
+
+    @PostMapping("/receptionist/create")
+    public ResponseEntity<OrderDTO> createOrderForReceptionist(@RequestParam Long tableId) {
+        return ResponseEntity.ok(orderService.createOrderByReceptionist(tableId));
+    }
+
     @PostMapping("/tables/{tableId}/add-dish")
     public ResponseEntity<OrderDTO> addDishToTable(
             @PathVariable Long tableId,
