@@ -100,22 +100,14 @@ public class OrderServiceImpl implements OrderService {
         TableEntity table = tableRepository.findById(tableId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found"));
 
-        // tìm order "pending" cho table
-        Order order = orderRepository.findByTableAndStatus(table, "pending")
-                .orElse(null);
-
-        if (order == null) {
-            order = Order.builder()
-                    .table(table)
-                    .status("pending")
-                    .createdAt(LocalDateTime.now())
-                    .build();
-        }
+        // Lấy order CONFIRMED cho table
+        Order order = orderRepository.findByTableAndStatus(table, "CONFIRMED")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No active order on this table"));
 
         Dish dish = dishRepository.findById(dishId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
 
-        // kiểm tra xem món đã có trong order chưa
+        // Kiểm tra xem món đã có trong order chưa
         OrderItem existingItem = order.getOrderItems()
                 .stream()
                 .filter(i -> i.getDish().getDishId().equals(dishId))
@@ -132,9 +124,17 @@ public class OrderServiceImpl implements OrderService {
             order.getOrderItems().add(newItem);
         }
 
-        orderRepository.save(order);
+        order = orderRepository.save(order);
 
         return toDTO(order);
+    }
+
+    @Override
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override

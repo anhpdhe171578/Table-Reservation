@@ -29,7 +29,6 @@ public class TableController {
         }
         return ResponseEntity.ok(new ApiResponse<>("success", "Lấy bàn thành công", tableDTO));
     }
-
     @PostMapping
     public ResponseEntity<ApiResponse<TableDTO>> createTable(@RequestBody TableDTO dto) {
         TableDTO created = tableService.createTable(dto);

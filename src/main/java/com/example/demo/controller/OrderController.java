@@ -42,6 +42,11 @@ public class OrderController {
         return ResponseEntity.ok(orderService.addDishToTable(tableId, dishId, quantity));
     }
 
+    @GetMapping
+    public List<OrderDTO> getAllOrders() {
+        return orderService.getAllOrders();
+    }
+
     @GetMapping("/user/{userID}")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUser(
             @PathVariable UUID userID) {

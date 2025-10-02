@@ -20,4 +20,5 @@ public interface OrderService {
     void removeOrderItem(Long orderId, Long dishId);
 
     OrderDTO addDishToTable(Long tableId, Long dishId, int quantity);
+    List<OrderDTO> getAllOrders();
 }
