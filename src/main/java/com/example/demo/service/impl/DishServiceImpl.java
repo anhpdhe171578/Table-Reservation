@@ -2,11 +2,13 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.DishDTO;
 import com.example.demo.entity.Dish;
-import com.example.demo.repository.CategoryRepository;
+import com.example.demo.entity.Category;
 import com.example.demo.repository.DishRepository;
 import com.example.demo.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,8 +18,7 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private DishRepository dishRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
+
     @Override
     public List<DishDTO> getAllDishes() {
         return dishRepository.findAll()
@@ -30,14 +31,13 @@ public class DishServiceImpl implements DishService {
     public DishDTO getDishById(Long id) {
         return dishRepository.findById(id)
                 .map(this::toDTO)
-                .orElse(null);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
     }
 
     @Override
     public DishDTO createDish(DishDTO dto) {
         Dish dish = toEntity(dto);
-        dish = dishRepository.save(dish);
-        return toDTO(dish);
+        return toDTO(dishRepository.save(dish));
     }
 
     @Override
@@ -49,16 +49,24 @@ public class DishServiceImpl implements DishService {
             d.setImage(dto.getImage());
             d.setType(dto.getType());
 
-            // Set category
-            categoryRepository.findById(dto.getCategoryId())
-                    .ifPresent(d::setCategory);
+            // Nếu DTO có categoryId, chỉ set một Category với id đó
+            if (dto.getCategoryId() != null) {
+                Category category = new Category();
+                category.setCategoryID(dto.getCategoryId());
+                d.setCategory(category);
+            } else {
+                d.setCategory(null);
+            }
 
             return toDTO(dishRepository.save(d));
-        }).orElse(null);
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
     }
 
     @Override
     public void deleteDish(Long id) {
+        if (!dishRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found");
+        }
         dishRepository.deleteById(id);
     }
 
@@ -83,8 +91,9 @@ public class DishServiceImpl implements DishService {
         d.setType(dto.getType());
 
         if (dto.getCategoryId() != null) {
-            categoryRepository.findById(dto.getCategoryId())
-                    .ifPresent(d::setCategory);
+            Category category = new Category();
+            category.setCategoryID(dto.getCategoryId());
+            d.setCategory(category);
         }
 
         return d;

@@ -1,20 +1,17 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.DishDTO;
-import com.example.demo.dto.OrderDTO;
-import com.example.demo.dto.OrderItemDTO;
-import com.example.demo.entity.CartItem;
+import com.example.demo.dto.*;
 import com.example.demo.entity.Dish;
 import com.example.demo.entity.Order;
 import com.example.demo.entity.OrderItem;
 import com.example.demo.entity.TableEntity;
 import com.example.demo.entity.User;
-import com.example.demo.repository.CartItemRepository;
-import com.example.demo.repository.DishRepository;
-import com.example.demo.repository.OrderRepository;
-import com.example.demo.repository.TableRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.service.CartService;
+import com.example.demo.service.DishService;
 import com.example.demo.service.OrderService;
+import com.example.demo.service.TableService;
+import com.example.demo.service.UserService;
+import com.example.demo.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,39 +27,52 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private DishService dishService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TableService tableService;
+
+    @Autowired
     private OrderRepository orderRepository;
-
-    @Autowired
-    private CartItemRepository cartItemRepository;
-
-    @Autowired
-    private DishRepository dishRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TableRepository tableRepository;
 
     // ===== Customer đặt bàn từ Cart =====
     @Override
     public OrderDTO createOrderFromCart(UUID userId, Long tableId, LocalDateTime reservationTime) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found"));
-        TableEntity table = tableRepository.findById(tableId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found"));
+        UserDTO userDTO = userService.getById(userId);
+        if (userDTO == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        List<CartItem> cartItems = cartItemRepository.findByUser(user);
+        TableDTO tableDTO = tableService.getTableById(tableId);
+        if (tableDTO == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found");
 
-        List<OrderItem> orderItems = cartItems.stream()
-                .map(c -> OrderItem.builder()
-                        .dish(c.getDish())
-                        .quantity(c.getQuantity())
-                        .build())
-                .collect(Collectors.toList());
+        List<CartItemDTO> cartItems = cartService.getCartByUser(userId);
+        if (cartItems.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
+
+        List<OrderItem> orderItems = cartItems.stream().map(c -> {
+            DishDTO dishDTO = dishService.getDishById(c.getDishId());
+            Dish dish = new Dish();
+            dish.setDishId(dishDTO.getId());
+            return OrderItem.builder()
+                    .dish(dish)
+                    .quantity(c.getQuantity())
+                    .build();
+        }).collect(Collectors.toList());
+
+        User user = new User();
+        user.setId(userDTO.getId());
+
+        TableEntity table = new TableEntity();
+        table.setTableID(tableDTO.getId());
 
         Order order = Order.builder()
                 .user(user)
                 .table(table)
-                .status("pending")
+                .status("PENDING")
                 .createdAt(LocalDateTime.now())
                 .reservationTime(reservationTime)
                 .orderItems(orderItems)
@@ -70,53 +80,60 @@ public class OrderServiceImpl implements OrderService {
 
         order = orderRepository.save(order);
 
-        cartItemRepository.deleteAll(cartItems);
+        cartService.clearCart(userId);
 
         return toDTO(order);
     }
 
+    // ===== Tạo order trống từ receptionist =====
     @Override
     public OrderDTO createOrderByReceptionist(Long tableId) {
-        TableEntity table = tableRepository.findById(tableId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found"));
+        TableDTO tableDTO = tableService.getTableById(tableId);
+        if (tableDTO == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found");
 
-        // Tạo order mới, chưa có món
+        TableEntity table = new TableEntity();
+        table.setTableID(tableDTO.getId());
+
         Order order = Order.builder()
                 .table(table)
-                .status("pending")
+                .status("PENDING")
                 .createdAt(LocalDateTime.now())
                 .reservationTime(LocalDateTime.now())
-                .orderItems(new ArrayList<>()) // chưa có món
+                .orderItems(new ArrayList<>())
                 .build();
 
         order = orderRepository.save(order);
         return toDTO(order);
     }
 
-
-
+    // ===== Thêm món vào order của table =====
     @Override
     public OrderDTO addDishToTable(Long tableId, Long dishId, int quantity) {
-        TableEntity table = tableRepository.findById(tableId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found"));
+        if (quantity <= 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be positive");
 
-        // Lấy order CONFIRMED cho table
+        TableDTO tableDTO = tableService.getTableById(tableId);
+        if (tableDTO == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found");
+
+        TableEntity table = new TableEntity();
+        table.setTableID(tableDTO.getId());
+
         Order order = orderRepository.findByTableAndStatus(table, "CONFIRMED")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No active order on this table"));
 
-        Dish dish = dishRepository.findById(dishId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
 
-        // Kiểm tra xem món đã có trong order chưa
-        OrderItem existingItem = order.getOrderItems()
-                .stream()
+        DishDTO dishDTO = dishService.getDishById(dishId);
+        if (dishDTO == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found");
+
+        OrderItem existing = order.getOrderItems().stream()
                 .filter(i -> i.getDish().getDishId().equals(dishId))
                 .findFirst()
                 .orElse(null);
 
-        if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + quantity);
         } else {
+            Dish dish = new Dish();
+            dish.setDishId(dishId);
             OrderItem newItem = OrderItem.builder()
                     .dish(dish)
                     .quantity(quantity)
@@ -125,40 +142,52 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order = orderRepository.save(order);
-
         return toDTO(order);
     }
 
+    // ===== Lấy tất cả order =====
     @Override
     public List<OrderDTO> getAllOrders() {
-        return orderRepository.findAll()
-                .stream()
+        return orderRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    // ===== Lấy order theo user =====
     @Override
     public List<OrderDTO> getOrdersByUser(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        return orderRepository.findByUser(user)
-                .stream()
+        UserDTO userDTO = userService.getById(userId);
+        if (userDTO == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        User user = new User();
+        user.setId(userDTO.getId());
+
+        return orderRepository.findByUser(user).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    // ===== Lấy order theo table =====
     @Override
     public List<OrderDTO> getOrdersByTable(Long tableId) {
-        TableEntity table = tableRepository.findById(tableId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found"));
-        return orderRepository.findByTable(table)
-                .stream()
+        TableDTO tableDTO = tableService.getTableById(tableId);
+        if (tableDTO == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Table not found");
+
+        TableEntity table = new TableEntity();
+        table.setTableID(tableDTO.getId());
+
+        return orderRepository.findByTable(table).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    // ===== Cập nhật quantity order item =====
     @Override
     public OrderDTO updateOrderItem(Long orderId, Long dishId, int quantity) {
-        Order order = orderRepository.findById(orderId).orElse(null);
-        if (order == null) return null;
+        if (quantity <= 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be positive");
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 
         order.getOrderItems().forEach(item -> {
             if (item.getDish().getDishId().equals(dishId)) {
@@ -166,55 +195,56 @@ public class OrderServiceImpl implements OrderService {
             }
         });
 
-        orderRepository.save(order);
+        order = orderRepository.save(order);
         return toDTO(order);
     }
 
+    // ===== Xóa order item =====
     @Override
     public void removeOrderItem(Long orderId, Long dishId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
-        if (order == null) return;
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 
         order.getOrderItems().removeIf(i -> i.getDish().getDishId().equals(dishId));
         orderRepository.save(order);
     }
 
+    // ===== Mapping helper =====
+    private OrderItemDTO toOrderItemDTO(OrderItem item) {
+        Dish dish = item.getDish();
+        double price = dish.getPrice();
+        double amount = price * item.getQuantity();
+
+        DishDTO dishDTO = new DishDTO(
+                dish.getDishId(),
+                dish.getName(),
+                dish.getPrice(),
+                dish.getDescription(),
+                dish.getImage(),
+                dish.getType(),
+                dish.getCategory() != null ? dish.getCategory().getCategoryID() : null
+        );
+
+        return new OrderItemDTO(
+                item.getId(),
+                dishDTO,
+                item.getQuantity(),
+                price,
+                amount
+        );
+    }
 
     private OrderDTO toDTO(Order order) {
-
-        List<OrderItemDTO> items = order.getOrderItems()
-                .stream()
-                .map(i -> {
-                    Dish dish = i.getDish();
-                    double price = dish.getPrice();
-                    double amount = i.getQuantity() * price;
-
-                    DishDTO dishDTO = new DishDTO(
-                            dish.getDishId(),
-                            dish.getName(),
-                            dish.getPrice(),
-                            dish.getDescription(),
-                            dish.getImage(),
-                            dish.getType(),
-                            dish.getCategory() != null ? dish.getCategory().getCategoryID() : null
-                    );
-
-                    return new OrderItemDTO(
-                            i.getId(),
-                            dishDTO,
-                            i.getQuantity(),
-                            price,
-                            amount
-                    );
-                })
+        List<OrderItemDTO> items = order.getOrderItems().stream()
+                .map(this::toOrderItemDTO)
                 .collect(Collectors.toList());
 
         double totalAmount = items.stream().mapToDouble(OrderItemDTO::getAmount).sum();
 
         return new OrderDTO(
                 order.getOrderID(),
-                order.getUser().getId(),
-                order.getTable().getTableID(),
+                order.getUser() != null ? order.getUser().getId() : null,
+                order.getTable() != null ? order.getTable().getTableID() : null,
                 order.getCreatedAt(),
                 order.getReservationTime(),
                 order.getStatus(),

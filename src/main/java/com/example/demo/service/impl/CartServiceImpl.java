@@ -1,6 +1,8 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.CartItemDTO;
+import com.example.demo.dto.DishDTO;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.entity.CartItem;
 import com.example.demo.entity.Dish;
 import com.example.demo.entity.User;
@@ -8,6 +10,8 @@ import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.DishRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.CartService;
+import com.example.demo.service.DishService;
+import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,15 +28,19 @@ public class CartServiceImpl implements CartService {
     private CartItemRepository cartItemRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
-    private DishRepository dishRepository;
+    private DishService dishService;
 
     @Override
     public List<CartItemDTO> getCartByUser(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        UserDTO userDTO = userService.getById(userId);
+        if (userDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        User user = new User();
+        user.setId(userDTO.getId());
         return cartItemRepository.findByUser(user)
                 .stream()
                 .map(this::toDTO)
@@ -41,10 +49,19 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemDTO addToCart(UUID userId, Long dishId, int quantity) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        Dish dish = dishRepository.findById(dishId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
+        UserDTO userDTO = userService.getById(userId);
+        if (userDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        User user = new User();
+        user.setId(userDTO.getId());
+
+        DishDTO dishDTO = dishService.getDishById(dishId);
+        if (dishDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found");
+        }
+        Dish dish = new Dish();
+        dish.setDishId(dishDTO.getId());
 
         CartItem item = cartItemRepository.findByUserAndDish(user, dish);
         if (item != null) {
@@ -61,10 +78,19 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemDTO updateQuantity(UUID userId, Long dishId, int quantity) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        Dish dish = dishRepository.findById(dishId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
+        UserDTO userDTO = userService.getById(userId);
+        if (userDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        User user = new User();
+        user.setId(userDTO.getId());
+
+        DishDTO dishDTO = dishService.getDishById(dishId);
+        if (dishDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found");
+        }
+        Dish dish = new Dish();
+        dish.setDishId(dishDTO.getId());
 
         CartItem item = cartItemRepository.findByUserAndDish(user, dish);
         if (item != null) {
@@ -76,10 +102,19 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void removeFromCart(UUID userId, Long dishId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        Dish dish = dishRepository.findById(dishId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
+        UserDTO userDTO = userService.getById(userId);
+        if (userDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        User user = new User();
+        user.setId(userDTO.getId());
+
+        DishDTO dishDTO = dishService.getDishById(dishId);
+        if (dishDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found");
+        }
+        Dish dish = new Dish();
+        dish.setDishId(dishDTO.getId());
 
         CartItem item = cartItemRepository.findByUserAndDish(user, dish);
         if (item != null) {
@@ -89,8 +124,12 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void clearCart(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        UserDTO userDTO = userService.getById(userId);
+        if (userDTO == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        User user = new User();
+        user.setId(userDTO.getId());
         cartItemRepository.deleteAllByUser(user);
     }
 

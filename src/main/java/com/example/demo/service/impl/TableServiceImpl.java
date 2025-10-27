@@ -1,10 +1,12 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.AreaDTO;
 import com.example.demo.dto.TableDTO;
 import com.example.demo.entity.Area;
 import com.example.demo.entity.TableEntity;
 import com.example.demo.repository.AreaRepository;
 import com.example.demo.repository.TableRepository;
+import com.example.demo.service.AreaService;
 import com.example.demo.service.TableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,7 @@ public class TableServiceImpl implements TableService {
     private TableRepository tableRepository;
 
     @Autowired
-    private AreaRepository areaRepository;
+    private AreaService areaService;
 
     @Override
     public List<TableDTO> getAllTables() {
@@ -55,8 +57,13 @@ public class TableServiceImpl implements TableService {
             t.setNumberOfDesk(dto.getNumberOfDesk());
             t.setUpdatedAt(LocalDateTime.now());
 
-            Area area = areaRepository.findById(dto.getAreaID())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Area not found"));
+            AreaDTO areaDTO = areaService.getAreaById(dto.getAreaID());
+            if (areaDTO == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Area not found");
+            }
+            Area area = new Area();
+            area.setAreaID(areaDTO.getId());
+            area.setAreaName(areaDTO.getAreaName());
             t.setArea(area);
 
             return toDTO(tableRepository.save(t));
@@ -87,8 +94,13 @@ public class TableServiceImpl implements TableService {
         t.setNumberOfDesk(dto.getNumberOfDesk());
 
         if (dto.getAreaID() != null) {
-            Area area = areaRepository.findById(dto.getAreaID())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Area not found"));
+            AreaDTO areaDTO = areaService.getAreaById(dto.getAreaID());
+            if (areaDTO == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Area not found");
+            }
+            Area area = new Area();
+            area.setAreaID(areaDTO.getId());
+            area.setAreaName(areaDTO.getAreaName());
             t.setArea(area);
         }
 
