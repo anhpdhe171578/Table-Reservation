@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "Tables")
+@Table(name = "tables")
 @Getter
 @Setter
 @NoArgsConstructor

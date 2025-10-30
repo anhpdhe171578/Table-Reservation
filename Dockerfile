@@ -1,13 +1,21 @@
-# -------- Chạy ứng dụng Spring Boot --------
+# -------- Stage 1: Build jar --------
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+
+WORKDIR /app
+
+# Copy toàn bộ project vào container
+COPY . .
+
+# Build project (bỏ qua test cho nhanh)
+RUN mvn clean package -DskipTests
+
+# -------- Stage 2: Run app --------
 FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
-# Copy file jar đã build sẵn
-COPY target/demo-0.0.1-SNAPSHOT.jar app.jar
+# Copy file jar từ stage build sang
+COPY --from=build /app/target/demo-0.0.1-SNAPSHOT.jar app.jar
 
-# Mở cổng 8080
 EXPOSE 8080
-
-# Lệnh chạy ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]

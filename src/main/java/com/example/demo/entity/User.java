@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "App_Users")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,7 +16,8 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @Column(columnDefinition = "uniqueidentifier")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     private String fullName;
