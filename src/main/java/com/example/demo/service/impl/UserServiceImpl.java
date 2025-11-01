@@ -1,23 +1,18 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.AdminAddUserRequest;
-import com.example.demo.dto.AuthResponse;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.Role;
-import com.example.demo.config.JwtUtil;
 import com.example.demo.entity.RoleName;
 import com.example.demo.entity.User;
-import com.example.demo.entity.UserRole;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.repository.UserRoleRepository;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.List;
 import java.util.Set;
@@ -31,8 +26,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
-    @Autowired
-    private UserRoleRepository userRoleRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Override
@@ -73,6 +67,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(user.getFullName())
                 .userName(user.getUserName())
                 .email(user.getEmail())
+                .role(user.getRoles().toString())
                 .phoneNumber(user.getPhoneNumber())
                 .status(user.isStatus() ? "active" : "inactive")
                 .build();
@@ -83,20 +78,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByUserName(request.getUserName()).isPresent()) {
             throw new RuntimeException("Username already exists!");
         }
-
-        // 🔹 Tạo user mới
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .fullName(request.getFullName())
-                .userName(request.getUserName())
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .gender(request.getGender())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .status(true)
-                .build();
-
-        userRepository.save(user);
 
         // 🔹 Xử lý role (Admin nhập vào)
         String inputRole = request.getRoleName() != null ? request.getRoleName().toString().toUpperCase() : "CUSTOMER";
@@ -110,13 +91,20 @@ public class UserServiceImpl implements UserService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
 
-        // 🔹 Gán role cho user
-        UserRole userRole = UserRole.builder()
-                .userId(user.getId())
-                .roleId(role.getId())
+        // 🔹 Tạo user mới và gán role trực tiếp
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .fullName(request.getFullName())
+                .userName(request.getUserName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .gender(request.getGender())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .status(true)
+                .roles(Set.of(role)) // Gán role trực tiếp
                 .build();
 
-        userRoleRepository.save(userRole);
+        userRepository.save(user); // Hibernate tự insert vào user_roles
 
         return toDTO(user);
     }

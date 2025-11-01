@@ -16,6 +16,7 @@ public class UserDTO {
     private String fullName;
     private String userName;
     private String email;
+    private String role;
     private String phoneNumber;
     private String status; // active, inactive
     private LocalDateTime createdAt;
