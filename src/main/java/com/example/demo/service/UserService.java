@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.AdminAddUserRequest;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.dto.RegisterRequest;
 import java.util.List;
@@ -10,4 +11,5 @@ public interface UserService {
     UserDTO getById(UUID id);
     UserDTO update(UUID id, RegisterRequest request);
     void delete(UUID id);
+    UserDTO addUserByAdmin(AdminAddUserRequest request);
 }

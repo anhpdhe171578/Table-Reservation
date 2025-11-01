@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.AdminAddUserRequest;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.UserDTO;
@@ -47,5 +48,11 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {
         userService.delete(id);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<UserDTO> addUserByAdmin(@RequestBody AdminAddUserRequest request) {
+        UserDTO user = userService.addUserByAdmin(request);
+        return ResponseEntity.ok(user);
     }
 }
