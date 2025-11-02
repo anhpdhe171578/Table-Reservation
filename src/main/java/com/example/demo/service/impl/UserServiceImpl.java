@@ -62,12 +62,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserDTO toDTO(User user) {
+        List<String> roles = user.getRoles()
+                .stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toList());
         return UserDTO.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .userName(user.getUserName())
                 .email(user.getEmail())
-                .role(user.getRoles().toString())
+                .role(roles)
                 .phoneNumber(user.getPhoneNumber())
                 .status(user.isStatus() ? "active" : "inactive")
                 .build();
@@ -91,7 +95,7 @@ public class UserServiceImpl implements UserService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
 
-        // 🔹 Tạo user mới và gán role trực tiếp
+
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .fullName(request.getFullName())
@@ -101,10 +105,10 @@ public class UserServiceImpl implements UserService {
                 .gender(request.getGender())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .status(true)
-                .roles(Set.of(role)) // Gán role trực tiếp
+                .roles(Set.of(role))
                 .build();
 
-        userRepository.save(user); // Hibernate tự insert vào user_roles
+        userRepository.save(user);
 
         return toDTO(user);
     }

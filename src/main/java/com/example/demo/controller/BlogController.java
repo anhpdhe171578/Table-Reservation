@@ -7,6 +7,7 @@ import com.example.demo.service.BlogService;
 import com.example.demo.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,12 +18,14 @@ public class BlogController {
     private BlogService blogService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<List<BlogDTO>>> getAllDishes() {
         List<BlogDTO> dishes = blogService.getAllBlogs();
         return ResponseEntity.ok(new ApiResponse<>("success", "Lấy danh sách món ăn thành công", dishes));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BlogDTO>> getDishById(@PathVariable Long id) {
         BlogDTO dishDTO = blogService.getBlogById(id);
         if (dishDTO == null) {
@@ -32,12 +35,14 @@ public class BlogController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BlogDTO>> createDish(@RequestBody BlogDTO dto) {
         BlogDTO created = blogService.createBlog(dto);
         return ResponseEntity.ok(new ApiResponse<>("success", "Tạo món ăn thành công", created));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BlogDTO>> updateDish(
             @PathVariable Long id,
             @RequestBody BlogDTO dto) {
@@ -47,6 +52,7 @@ public class BlogController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteDish(@PathVariable Long id) {
         blogService.deleteBlog(id);
         return ResponseEntity.ok(new ApiResponse<>("success", "Xóa món ăn thành công", null));

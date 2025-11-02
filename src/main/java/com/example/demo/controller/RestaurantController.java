@@ -5,6 +5,7 @@ import com.example.demo.dto.RestaurantDTO;
 import com.example.demo.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class RestaurantController {
     private RestaurantService restaurantService;
 
     @GetMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<List<RestaurantDTO>>> getAllRestaurants() {
         List<RestaurantDTO> restaurants = restaurantService.getAllRestaurants();
         return ResponseEntity.ok(new ApiResponse<>("success", "Lấy danh sách nhà hàng thành công", restaurants));
@@ -32,6 +34,7 @@ public class RestaurantController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<RestaurantDTO>> createRestaurant(
             @RequestBody RestaurantDTO dto) {
         RestaurantDTO created = restaurantService.createRestaurant(dto);

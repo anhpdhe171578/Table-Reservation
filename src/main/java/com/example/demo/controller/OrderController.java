@@ -5,6 +5,7 @@ import com.example.demo.dto.OrderDTO;
 import com.example.demo.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping("/customer/create")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<OrderDTO> createOrderForCustomer(
             @RequestParam UUID userId,
             @RequestParam Long tableId,
@@ -29,11 +31,13 @@ public class OrderController {
     }
 
     @PostMapping("/receptionist/create")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST')")
     public ResponseEntity<OrderDTO> createOrderForReceptionist(@RequestParam Long tableId) {
         return ResponseEntity.ok(orderService.createOrderByReceptionist(tableId));
     }
 
     @PostMapping("/tables/{tableId}/add-dish")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<OrderDTO> addDishToTable(
             @PathVariable Long tableId,
             @RequestParam Long dishId,
@@ -43,11 +47,13 @@ public class OrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public List<OrderDTO> getAllOrders() {
         return orderService.getAllOrders();
     }
 
     @GetMapping("/user/{userID}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUser(
             @PathVariable UUID userID) {
         List<OrderDTO> orders = orderService.getOrdersByUser(userID);
@@ -55,6 +61,7 @@ public class OrderController {
     }
 
     @GetMapping("/table/{tableID}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByTable(
             @PathVariable Long tableID) {
         List<OrderDTO> orders = orderService.getOrdersByTable(tableID);
@@ -62,6 +69,7 @@ public class OrderController {
     }
 
     @PutMapping("/{orderID}/update-item")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<OrderDTO>> updateOrderItem(
             @PathVariable Long orderID,
             @RequestParam Long dishId,
@@ -73,6 +81,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{orderID}/remove-item")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<Void>> removeOrderItem(
             @PathVariable Long orderID,
             @RequestParam Long dishId) {

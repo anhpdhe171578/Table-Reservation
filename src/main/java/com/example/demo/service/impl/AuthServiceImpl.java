@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -43,18 +44,18 @@ public class AuthServiceImpl implements AuthService {
             );
         }
 
-        // 🔸 Kiểm tra email trùng
+        //Kiểm tra email
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "Email already exists"
             );
         }
 
-        // 🔹 Lấy role CUSTOMER
+        //Lấy role
         Role customerRole = roleRepository.findByName(RoleName.CUSTOMER)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role CUSTOMER not found"));
 
-        // 🔸 Tạo user mới và gán role
+        //Tạo user mới và gán role
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .fullName(request.getFullName())
@@ -64,19 +65,29 @@ public class AuthServiceImpl implements AuthService {
                 .gender(request.getGender())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .status(true)
-                .roles(Set.of(customerRole)) // Gán role trực tiếp
+                .roles(Set.of(customerRole))
                 .build();
 
-        userRepository.save(user); // Hibernate tự insert vào user_roles
+        userRepository.save(user);
 
-        // 🔹 Tạo JWT token
-        String token = jwtUtil.generateToken(user.getId(), user.getUserName());
+        //Tạo JWT token
+        List<String> roles = user.getRoles()
+                .stream()
+                .map(role -> "ROLE_" + role.getName().name())
+                .toList();
 
+        String token = jwtUtil.generateToken(user.getId(), user.getUserName(), roles);
+
+        List<String> rolesForDto = user.getRoles()
+                .stream()
+                .map(role -> role.getName().name())
+                .toList();
         return AuthResponse.builder()
                 .token(token)
                 .username(user.getUserName())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .role(rolesForDto)
                 .phoneNumber(user.getPhoneNumber())
                 .gender(user.getGender())
                 .build();
@@ -94,12 +105,22 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(user.getId(), user.getUserName());
+        List<String> roles = user.getRoles() // chuyển sang List<String>
+                .stream()
+                .map(role -> "ROLE_" + role.getName().name())
+                .toList();
+
+        String token = jwtUtil.generateToken(user.getId(), user.getUserName(), roles);
+        List<String> rolesForDto = user.getRoles()
+                .stream()
+                .map(role -> role.getName().name())
+                .toList();
         return AuthResponse.builder()
                 .token(token)
                 .username(user.getUserName())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .role(rolesForDto)
                 .phoneNumber(user.getPhoneNumber())
                 .gender(user.getGender())
                 .build();

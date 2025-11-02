@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
@@ -16,7 +18,7 @@ public class UserDTO {
     private String fullName;
     private String userName;
     private String email;
-    private String role;
+    private List<String> role;
     private String phoneNumber;
     private String status; // active, inactive
     private LocalDateTime createdAt;

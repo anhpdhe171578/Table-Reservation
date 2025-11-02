@@ -5,6 +5,7 @@ import com.example.demo.dto.AreaDTO;
 import com.example.demo.service.AreaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,12 +18,14 @@ public class AreaController {
     private AreaService areaService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AreaDTO>>> getAllAreas() {
         List<AreaDTO> areas = areaService.getAllAreas();
         return ResponseEntity.ok(new ApiResponse<>("success", "Lấy danh sách khu vực thành công", areas));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AreaDTO>> getAreaById(@PathVariable Long id) {
         AreaDTO areaDTO = areaService.getAreaById(id);
         if (areaDTO == null) {
@@ -32,12 +35,14 @@ public class AreaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AreaDTO>> createArea(@RequestBody AreaDTO dto) {
         AreaDTO created = areaService.createArea(dto);
         return ResponseEntity.ok(new ApiResponse<>("success", "Tạo khu vực thành công", created));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AreaDTO>> updateArea(
             @PathVariable Long id,
             @RequestBody AreaDTO dto) {
@@ -47,6 +52,7 @@ public class AreaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteArea(@PathVariable Long id) {
         areaService.deleteArea(id);
         return ResponseEntity.ok(new ApiResponse<>("success", "Xóa khu vực thành công", null));

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,4 +18,5 @@ public class AuthResponse {
     private String email;
     private String phoneNumber;
     private String gender;
+    private List<String> role;
 }

@@ -5,6 +5,7 @@ import com.example.demo.dto.CartItemDTO;
 import com.example.demo.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
@@ -17,12 +18,14 @@ public class CartController {
     private CartService cartService;
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<List<CartItemDTO>>> getCart(@PathVariable UUID userId) {
         List<CartItemDTO> cart = cartService.getCartByUser(userId);
         return ResponseEntity.ok(new ApiResponse<>("success", "Lấy giỏ hàng thành công", cart));
     }
 
     @PostMapping("/{userId}/add")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<CartItemDTO>> addToCart(
             @PathVariable UUID userId,
             @RequestParam Long dishId,
@@ -32,6 +35,7 @@ public class CartController {
     }
 
     @PutMapping("/{userId}/update")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<CartItemDTO>> updateCart(
             @PathVariable UUID userId,
             @RequestParam Long dishId,
@@ -43,6 +47,7 @@ public class CartController {
     }
 
     @DeleteMapping("/{userId}/remove")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<Void>> removeFromCart(
             @PathVariable UUID userId,
             @RequestParam Long dishId) {
@@ -51,6 +56,7 @@ public class CartController {
     }
 
     @DeleteMapping("/{userId}/clear")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<Void>> clearCart(@PathVariable UUID userId) {
         cartService.clearCart(userId);
         return ResponseEntity.ok(new ApiResponse<>("success", "Xóa toàn bộ giỏ hàng thành công", null));

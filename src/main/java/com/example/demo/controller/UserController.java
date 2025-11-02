@@ -30,6 +30,7 @@ public class UserController {
 
     // Lấy user theo id
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> getById(@PathVariable UUID id) {
         UserDTO user = userService.getById(id);
         if (user == null) return ResponseEntity.notFound().build();
@@ -38,6 +39,7 @@ public class UserController {
 
     // Cập nhật user
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> update(
             @PathVariable UUID id,
             @RequestBody RegisterRequest request) {
@@ -48,11 +50,13 @@ public class UserController {
 
     // Xóa user
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable UUID id) {
         userService.delete(id);
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> addUserByAdmin(@RequestBody AdminAddUserRequest request) {
         UserDTO user = userService.addUserByAdmin(request);
         return ResponseEntity.ok(user);
