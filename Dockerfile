@@ -1,21 +1,21 @@
-# -------- Stage 1: Build jar --------
+#Build jar
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# ⚡ 1️⃣ Copy pom.xml trước để cache dependency
+#Copy pom.xml trước để cache dependency
 COPY pom.xml .
 
-# ⚡ 2️⃣ Tải sẵn dependency (offline)
+#Tải sẵn dependency (offline)
 RUN mvn dependency:go-offline -B
 
-# ⚡ 3️⃣ Copy code sau để không làm mất cache dependency
+#Copy code sau để không làm mất cache dependency
 COPY src ./src
 
-# ⚡ 4️⃣ Build project (bỏ qua test cho nhanh)
+#Build project
 RUN mvn clean package -DskipTests
 
-# -------- Stage 2: Run app --------
+#Run app
 FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
